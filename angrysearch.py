@@ -73,6 +73,7 @@ class ThreadDBQuery(Qc.QThread):
     def run(self):
         """Run user's search query"""
 
+        self.words_quoted = []
         if self.regex_mode:
             q = "SELECT * FROM angry_table WHERE path REGEXP ? LIMIT ?"
             params = (self.db_query, self.number_of_results)
@@ -82,8 +83,8 @@ class ThreadDBQuery(Qc.QThread):
             params = (sql_query, self.number_of_results)
         else:
             sql_query = self.like_query_adjustment(self.db_query)
-            q = "SELECT * FROM angry_table WHERE path LIKE ? LIMIT ?"
-            params = (sql_query, self.number_of_results)
+            q = "SELECT * FROM angry_table WHERE path LIKE {} LIMIT ?".format(sql_query)
+            params = (self.number_of_results,)
 
         db_query_result = run_query(q, params).fetchall()
         self.db_query_signal.emit(self.db_query,
